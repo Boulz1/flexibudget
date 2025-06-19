@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import TextInputFormField from './forms/TextInputFormField';
 import SelectFormField from './forms/SelectFormField';
-import { PILLARS } from '../../constants'; // Adjusted path
+import { PILLARS } from '../constants'; // Adjusted path
 
 const categorySchema = z.object({
   type: z.enum(['revenu', 'depense']),

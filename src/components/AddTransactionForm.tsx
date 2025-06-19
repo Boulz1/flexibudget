@@ -7,7 +7,7 @@ import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import TextInputFormField from './forms/TextInputFormField';
 import SelectFormField from './forms/SelectFormField';
-import { PILLARS } from '../../constants';
+import { PILLARS } from '../constants';
 
 const transactionSchema = z.object({
   type: z.enum(['revenu', 'depense']),
@@ -59,7 +59,7 @@ const AddTransactionForm = ({ onFormSubmit, editingTransactionId }: AddTransacti
   const selectedPillar = watch('pillar');
 
   const availableCategoryOptions = useMemo(() => {
-    let filteredCategories = [];
+    let filteredCategories: any[] = [];
     if (transactionType === 'revenu') {
       filteredCategories = allCategories.filter(c => c.type === 'revenu');
     } else if (transactionType === 'depense' && selectedPillar) {
