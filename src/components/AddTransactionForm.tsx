@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useCategoryStore } from '../stores/categoryStore';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import TextInputFormField from './forms/TextInputFormField';
 import SelectFormField from './forms/SelectFormField';
@@ -31,6 +31,7 @@ interface AddTransactionFormProps {
 const AddTransactionForm = ({ onFormSubmit, editingTransactionId }: AddTransactionFormProps) => {
   const { transactions, addTransaction, updateTransaction } = useTransactionStore();
   const allCategories = useCategoryStore((state) => state.categories);
+  const [lastUsedDate, setLastUsedDate] = useState<string | null>(null);
 
   const isEditing = !!editingTransactionId;
   const transactionToEdit = useMemo(() => isEditing ? transactions.find(t => t.id === editingTransactionId) : undefined, [isEditing, editingTransactionId, transactions]);
@@ -51,9 +52,16 @@ const AddTransactionForm = ({ onFormSubmit, editingTransactionId }: AddTransacti
       const category = allCategories.find(c => c.id === transactionToEdit.categoryId);
       reset({ ...transactionToEdit, pillar: category?.pillar });
     } else {
-      reset({ type: 'depense', date: new Date().toISOString().split('T')[0], description: '', amount: undefined, categoryId: '', pillar: undefined });
+      reset({
+        type: 'depense',
+        date: lastUsedDate || new Date().toISOString().split('T')[0],
+        description: '',
+        amount: undefined,
+        categoryId: '',
+        pillar: undefined
+      });
     }
-  }, [transactionToEdit, reset, allCategories]);
+  }, [transactionToEdit, reset, allCategories, lastUsedDate]);
 
   const transactionType = watch('type');
   const selectedPillar = watch('pillar');
@@ -96,7 +104,8 @@ const AddTransactionForm = ({ onFormSubmit, editingTransactionId }: AddTransacti
       addTransaction(submissionData);
       toast.success('Transaction ajoutée avec succès !');
     }
-    onFormSubmit();
+    setLastUsedDate(data.date); // Store the submitted date
+    // onFormSubmit(); // Removed to prevent modal from closing automatically
   };
 
   const typeOptions = [
