@@ -20,12 +20,23 @@ interface CategoryState {
   updateCategory: (id: string, data: Partial<Omit<Category, 'id'>>) => void;
 }
 
+/**
+ * Zustand store for managing categories.
+ * Persists category data to local storage using `persist` middleware.
+ */
 export const useCategoryStore = create<CategoryState>()(
   persist(
     (set) => ({
       categories: initialCategories,
 
+      /**
+       * Adds a new category to the store.
+       * The ID is auto-generated using a timestamp and a random number.
+       * @param categoryData - An object containing the category details.
+       *                     It can be for 'revenu' (name, type) or 'depense' (name, type, pillar).
+       */
       addCategory: (categoryData) => {
+        // ID generation: Uses timestamp and random number. For high-concurrency scenarios, UUID might be more robust.
         const newCategory: Category = {
           id: `cat-${Date.now()}-${Math.random()}`,
           ...categoryData,
@@ -35,6 +46,10 @@ export const useCategoryStore = create<CategoryState>()(
         }));
       },
       
+      /**
+       * Deletes a category from the store by its ID.
+       * @param categoryId - The ID of the category to delete.
+       */
       deleteCategory: (categoryId) => {
         set((state) => ({
           categories: state.categories.filter(
@@ -43,7 +58,12 @@ export const useCategoryStore = create<CategoryState>()(
         }));
       },
 
-      // --- Logique de mise à jour ajoutée ---
+      /**
+       * Updates an existing category in the store.
+       * If the category type is changed to 'revenu', its pillar is set to undefined.
+       * @param id - The ID of the category to update.
+       * @param data - An object containing the partial category data to update.
+       */
       updateCategory: (id, data) => {
         set((state) => ({
           categories: state.categories.map((category) =>

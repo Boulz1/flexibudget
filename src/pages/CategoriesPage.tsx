@@ -35,11 +35,11 @@ const CategoriesPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestion des Catégories</h1>
+      <div className="flex justify-between items-center mb-6"> {/* Added mb-6 to the container of h1 and button */}
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gestion des Catégories</h1>
         <button
           onClick={handleOpenAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-150"
         >
           + Ajouter une catégorie
         </button>

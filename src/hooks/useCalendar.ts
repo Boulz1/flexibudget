@@ -7,28 +7,40 @@ import {
   startOfWeek 
 } from 'date-fns';
 
+/**
+ * Custom hook for generating calendar days for a given month.
+ * It provides an array of Date objects representing the days to be displayed
+ * on a calendar grid, including leading and trailing days from adjacent months
+ * to fill a complete week view starting on Monday.
+ *
+ * @param currentDate - A Date object representing any day within the target month.
+ * @returns An object containing:
+ *  - `days`: An array of Date objects for the calendar grid.
+ *  - `firstDayOfMonth`: A Date object representing the first day of the target month.
+ *  - `lastDayOfMonth`: A Date object representing the last day of the target month.
+ */
 export const useCalendar = (currentDate: Date) => {
-  // useMemo garantit que ces calculs ne sont pas refaits inutilement
+  // useMemo ensures these calculations are only re-done if currentDate changes.
   const calendarData = useMemo(() => {
-    // 1. Déterminer le premier et le dernier jour du mois
+    // Determine the first and last day of the target month.
     const firstDayOfMonth = startOfMonth(currentDate);
     const lastDayOfMonth = endOfMonth(currentDate);
     
-    // 2. Déterminer le début et la fin de la période à afficher
-    // Pour commencer la semaine le Lundi, on ajoute { weekStartsOn: 1 }
+    // Determine the start and end dates of the full weeks to display.
+    // weekStartsOn: 1 ensures the week starts on Monday.
     const startDate = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
     const endDate = endOfWeek(lastDayOfMonth, { weekStartsOn: 1 });
 
-    // 3. Créer un tableau de tous les jours dans cet intervalle
+    // Create an array of all days within that interval.
     const daysInMonth = eachDayOfInterval({
       start: startDate,
       end: endDate,
     });
 
     return {
-      days: daysInMonth, // Le tableau complet des jours à afficher
-      firstDayOfMonth,   // Le premier jour du mois actuel
-      lastDayOfMonth,    // Le dernier jour du mois actuel
+      days: daysInMonth,    // Array of all days to display on the grid.
+      firstDayOfMonth,      // First day of the actual selected month.
+      lastDayOfMonth,       // Last day of the actual selected month.
     };
   }, [currentDate]);
 

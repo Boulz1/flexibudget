@@ -7,8 +7,8 @@ const SummaryCard = ({ title, amount, className, budgetPercentage, budgetAmount 
 
   return (
     <div className={`p-4 rounded-xl shadow-lg flex flex-col transition-transform duration-200 ease-in-out hover:scale-105 ${className}`}>
-      <div className="flex justify-between items-baseline">
-        <h3 className="text-sm font-medium text-white/80">{title}</h3>
+      <div className="flex justify-between items-baseline mb-1">
+        <h3 className="text-base font-semibold text-white/90">{title}</h3>
         {/* Affichage conditionnel du pourcentage */}
         {budgetPercentage !== undefined && (
           <span className="text-xs font-bold text-white/60">

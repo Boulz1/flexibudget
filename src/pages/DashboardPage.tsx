@@ -22,6 +22,8 @@ const DashboardPage = () => {
   const { budget: budgetPercentages, currency } = useSettingsStore();
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
 
+  // Calculates derived data for the dashboard based on transactions and settings.
+  // Memoized to optimize performance, re-calculating only when dependencies change.
   const { totalRevenu, depensesParPilier, budget, availableMonths } = useMemo(() => {
     const months = new Set(allTransactions.map(t => t.date.substring(0, 7)));
     const sortedMonths = Array.from(months).sort((a, b) => b.localeCompare(a));
@@ -41,10 +43,11 @@ const DashboardPage = () => {
 
   const chartTextColor = theme === 'light' ? '#374151' : '#E5E7EB';
 
+  // Common chart options for both Bar and Doughnut charts.
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    scales: {
+    scales: { // Scales configuration (relevant for Bar chart, ignored by Doughnut)
       x: { ticks: { color: chartTextColor }, grid: { color: theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)' } },
       y: { ticks: { color: chartTextColor }, grid: { color: theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)' } },
     },
@@ -58,6 +61,7 @@ const DashboardPage = () => {
   };
 
   const labels = ['Besoins', 'Envies', 'Épargne'];
+  // Data configuration for the Bar chart displaying budget vs actual expenses per pillar.
   const barChartData = {
     labels,
     datasets: [
@@ -78,6 +82,7 @@ const DashboardPage = () => {
     ],
   };
 
+  // Data configuration for the Doughnut chart showing distribution of expenses per pillar.
   const doughnutChartData = {
     labels,
     datasets: [
@@ -85,20 +90,20 @@ const DashboardPage = () => {
         label: 'Répartition des Dépenses',
         data: [depensesParPilier.Besoins, depensesParPilier.Envies, depensesParPilier.Épargne],
         backgroundColor: [chartColors.besoins, chartColors.envies, chartColors.epargne],
-        borderColor: theme === 'light' ? '#ffffff' : '#1f2937',
+        borderColor: theme === 'light' ? '#ffffff' : '#1f2937', // Border color for doughnut segments
         borderWidth: 3,
       },
     ],
   };
 
   
-  const cardBaseClass = "bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700";
+  const cardBaseClass = "bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg";
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <h1 className="text-3xl font-bold">Tableau de bord</h1>
-        <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:ring-2 focus:ring-brand-besoins focus:border-brand-besoins">
+        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Tableau de bord</h1>
+        <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:ring-2 focus:ring-brand-besoins focus:border-brand-besoins transition-colors duration-150">
           {availableMonths.map(month => <option key={month} value={month}>{month}</option>)}
         </select>
       </div>
@@ -112,13 +117,13 @@ const DashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={cardBaseClass}>
-          <h2 className="text-xl font-semibold mb-4 text-center">Budget vs Dépenses</h2>
+          <h2 className="text-xl font-semibold mb-4 text-left text-gray-900 dark:text-gray-100">Budget vs Dépenses</h2>
           <div className="relative h-80">
             <Bar data={barChartData} options={chartOptions} />
           </div>
         </div>
         <div className={`${cardBaseClass} flex flex-col items-center`}>
-          <h2 className="text-xl font-semibold mb-4 text-center">Répartition des Dépenses</h2>
+          <h2 className="text-xl font-semibold mb-4 text-left text-gray-900 dark:text-gray-100">Répartition des Dépenses</h2>
           <div className="w-full max-w-xs">
             <Doughnut data={doughnutChartData} options={{ plugins: { legend: { labels: { color: chartTextColor } } } }} />
           </div>
