@@ -15,7 +15,7 @@ const transactionSchema = z.object({
   categoryId: z.string().min(1, "Veuillez sélectionner une catégorie."),
   amount: z.coerce.number().positive({ message: "Le montant doit être un nombre positif." }),
   date: z.string().min(1, { message: "La date est requise." }),
-  description: z.string().min(3, { message: "La description doit contenir au moins 3 caractères." }),
+  description: z.string().optional(),
 }).refine(data => data.type === 'revenu' || (data.type === 'depense' && !!data.pillar), {
   message: "Veuillez sélectionner un pilier.",
   path: ["pillar"],
