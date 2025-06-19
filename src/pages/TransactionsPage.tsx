@@ -7,6 +7,7 @@ import AddTransactionForm from '../components/AddTransactionForm';
 import TransactionDetailPanel from '../components/TransactionDetailPanel';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useCategoryStore } from '../stores/categoryStore';
 import type { Transaction } from '../types';
 import toast from 'react-hot-toast';
 
@@ -19,7 +20,15 @@ const TransactionsPage = () => {
   // --- HOOKS & STORES ---
   const { days, firstDayOfMonth } = useCalendar(currentDate);
   const { transactions: allTransactions, deleteTransaction } = useTransactionStore();
+  const { categories } = useCategoryStore();
   const { currency } = useSettingsStore();
+
+  // Helper function to get category name by ID
+  const getCategoryNameById = (categoryId: string | undefined) => {
+    if (!categoryId) return 'N/A';
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : 'N/A';
+  };
 
   // Groups transactions by date for efficient lookup and display in the calendar.
   const transactionsByDate = useMemo(() => {
@@ -99,9 +108,9 @@ const TransactionsPage = () => {
                   <div 
                     key={transaction.id}
                     className={`p-1 text-xs rounded text-white truncate ${transaction.type === 'revenu' ? 'bg-brand-revenu' : 'bg-red-500'}`}
-                    title={`${transaction.description}: ${transaction.amount.toLocaleString('fr-FR', {style: 'currency', currency})}`}
+                    title={`${getCategoryNameById(transaction.categoryId)}: ${transaction.description} - ${transaction.amount.toLocaleString('fr-FR', {style: 'currency', currency})}`}
                   >
-                    {transaction.description}
+                    {getCategoryNameById(transaction.categoryId)}
                   </div>
                 ))}
                 {transactionsForDay.length > 2 && (
