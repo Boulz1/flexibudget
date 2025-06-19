@@ -1,5 +1,6 @@
 // src/components/forms/TextInputFormField.tsx
-import { FieldError, UseFormRegisterReturn } from 'react-hook-form';
+// src/components/forms/TextInputFormField.tsx
+import type { FieldError, UseFormRegisterReturn } from 'react-hook-form';
 
 /**
  * Props for the TextInputFormField component.

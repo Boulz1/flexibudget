@@ -1,5 +1,6 @@
 // src/components/forms/SelectFormField.tsx
-import { FieldError, UseFormRegisterReturn } from 'react-hook-form';
+// src/components/forms/SelectFormField.tsx
+import type { FieldError, UseFormRegisterReturn } from 'react-hook-form';
 
 /**
  * Represents a single option for the SelectFormField.
