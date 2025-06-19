@@ -108,7 +108,7 @@ const TransactionsPage = () => {
                   <div 
                     key={transaction.id}
                     className={`p-1 text-xs rounded text-white truncate ${transaction.type === 'revenu' ? 'bg-brand-revenu' : 'bg-red-500'}`}
-                    title={`${getCategoryNameById(transaction.categoryId)}: ${transaction.description} - ${transaction.amount.toLocaleString('fr-FR', {style: 'currency', currency})}`}
+                    title={`${getCategoryNameById(transaction.categoryId)}${transaction.description ? `: ${transaction.description}` : ''} - ${transaction.amount.toLocaleString('fr-FR', {style: 'currency', currency})}`}
                   >
                     {getCategoryNameById(transaction.categoryId)}
                   </div>
