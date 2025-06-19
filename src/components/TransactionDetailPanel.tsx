@@ -34,13 +34,21 @@ const TransactionDetailPanel = ({ transactions, onEdit, onDelete }: TransactionD
                 <p className={`font-bold w-28 text-right ${t.type === 'revenu' ? 'text-brand-revenu' : 'text-red-500'}`}>
                   {t.type === 'revenu' ? '+' : '-'} {t.amount.toLocaleString('fr-FR', {style: 'currency', currency})}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1"> {/* Reduced gap for tighter buttons if p-2 is used */}
                   {/* Boutons d'action avec les nouvelles icônes */}
-                  <button onClick={() => onEdit(t.id)} className="text-gray-400 ... hover:text-brand-besoins transition-transform hover:scale-125">
-                    <Pencil size={16} />
+                  <button
+                    onClick={() => onEdit(t.id)}
+                    className="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-blue-600 transition-colors duration-150"
+                    title="Modifier la transaction"
+                  >
+                    <Pencil size={18} />
                   </button>
-                  <button onClick={() => onDelete(t.id)} className="text-gray-400 ... hover:text-red-500 transition-transform hover:scale-125">
-                    <Trash2 size={16} />
+                  <button
+                    onClick={() => onDelete(t.id)}
+                    className="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-red-500 transition-colors duration-150"
+                    title="Supprimer la transaction"
+                  >
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>

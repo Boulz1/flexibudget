@@ -12,15 +12,16 @@ import toast from 'react-hot-toast';
 
 const TransactionsPage = () => {
   // --- ÉTATS ---
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date()); // Tracks the current month/year being viewed in the calendar.
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Stores the date clicked by the user to view details or add transactions.
+  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null); // ID of the transaction being edited, or 'new' for adding. Controls modal visibility.
 
   // --- HOOKS & STORES ---
   const { days, firstDayOfMonth } = useCalendar(currentDate);
   const { transactions: allTransactions, deleteTransaction } = useTransactionStore();
   const { currency } = useSettingsStore();
 
+  // Groups transactions by date for efficient lookup and display in the calendar.
   const transactionsByDate = useMemo(() => {
     return allTransactions.reduce((acc, transaction) => {
       const dateKey = format(new Date(transaction.date), 'yyyy-MM-dd');
@@ -35,10 +36,13 @@ const TransactionsPage = () => {
   const goToNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const goToToday = () => setCurrentDate(new Date());
   
+  /** Handles selection of a day on the calendar to show transaction details. */
   const handleSelectDay = (day: Date) => setSelectedDate(day);
+  /** Opens the modal for adding a new transaction. */
   const handleOpenAddModal = () => setEditingTransactionId('new');
   const handleOpenEditModal = (id: string) => setEditingTransactionId(id);
 
+  /** Closes all modals (transaction detail and add/edit form). */
   const handleCloseAllModals = () => {
     setSelectedDate(null);
     setEditingTransactionId(null);
@@ -51,7 +55,8 @@ const TransactionsPage = () => {
       {/* EN-TÊTE DE NAVIGATION */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-2 sm:gap-4">
-          <h1 className="text-2xl font-bold capitalize">
+          {/* Page title is now the dynamic month/year */}
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             {format(currentDate, 'MMMM yyyy', { locale: fr })}
           </h1>
           <div className="flex items-center gap-1 sm:gap-2">
@@ -62,7 +67,7 @@ const TransactionsPage = () => {
         </div>
         <button
           onClick={handleOpenAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-150 w-full sm:w-auto"
         >
           + Ajouter une transaction
         </button>

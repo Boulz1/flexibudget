@@ -4,12 +4,14 @@ import { z } from 'zod';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useCategoryStore } from '../stores/categoryStore';
 import { useEffect, useMemo } from 'react';
-import type { Pillar } from '../types';
 import toast from 'react-hot-toast';
+import TextInputFormField from './forms/TextInputFormField';
+import SelectFormField from './forms/SelectFormField';
+import { PILLARS } from '../../constants';
 
 const transactionSchema = z.object({
   type: z.enum(['revenu', 'depense']),
-  pillar: z.enum(['Besoins', 'Envies', 'Épargne']).optional(),
+  pillar: z.enum(PILLARS).optional(),
   categoryId: z.string().min(1, "Veuillez sélectionner une catégorie."),
   amount: z.coerce.number().positive({ message: "Le montant doit être un nombre positif." }),
   date: z.string().min(1, { message: "La date est requise." }),
@@ -56,95 +58,116 @@ const AddTransactionForm = ({ onFormSubmit, editingTransactionId }: AddTransacti
   const transactionType = watch('type');
   const selectedPillar = watch('pillar');
 
-  const availableCategories = useMemo(() => {
+  const availableCategoryOptions = useMemo(() => {
+    let filteredCategories = [];
     if (transactionType === 'revenu') {
-      return allCategories.filter(c => c.type === 'revenu');
+      filteredCategories = allCategories.filter(c => c.type === 'revenu');
+    } else if (transactionType === 'depense' && selectedPillar) {
+      filteredCategories = allCategories.filter(c => c.pillar === selectedPillar);
     }
-    if (transactionType === 'depense' && selectedPillar) {
-      return allCategories.filter(c => c.pillar === selectedPillar);
-    }
-    return [];
+    return filteredCategories.map(cat => ({ value: cat.id, label: cat.name }));
   }, [allCategories, transactionType, selectedPillar]);
 
   useEffect(() => {
     const currentCategoryId = watch('categoryId');
-    const categoryExists = availableCategories.some(c => c.id === currentCategoryId);
+    const categoryExists = availableCategoryOptions.some(c => c.value === currentCategoryId);
     
     if(!isEditing) {
       if(transactionType === 'revenu') setValue('pillar', undefined);
       if(!categoryExists) setValue('categoryId', '');
     }
-  }, [transactionType, selectedPillar, availableCategories, setValue, isEditing, watch]);
+  }, [transactionType, selectedPillar, availableCategoryOptions, setValue, isEditing, watch]);
 
   const onSubmit = (data: TransactionFormData) => {
-    const { pillar, ...transactionData } = data; 
+    const submissionData = { ...data };
+
+    // Ensure pillar is undefined if it's a 'revenu' type transaction
+    // The schema ensures pillar is present for 'depense' if required by its logic
+    if (submissionData.type === 'revenu') {
+      submissionData.pillar = undefined;
+    }
+    // For 'depense', data.pillar should already be correctly set by the form's state,
+    // driven by the schema and useEffect hooks.
+
     if (isEditing && editingTransactionId) {
-      updateTransaction(editingTransactionId, transactionData);
+      updateTransaction(editingTransactionId, submissionData);
       toast.success('Transaction modifiée avec succès !');
     } else {
-      addTransaction(transactionData);
+      addTransaction(submissionData);
       toast.success('Transaction ajoutée avec succès !');
     }
     onFormSubmit();
   };
 
-  const pillars: Pillar[] = ['Besoins', 'Envies', 'Épargne'];
-  const baseInputClass = "mt-1 w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-brand-besoins focus:border-brand-besoins";
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300";
+  const typeOptions = [
+    { value: 'depense', label: 'Dépense' },
+    { value: 'revenu', label: 'Revenu' },
+  ];
+  const pillarOptions = PILLARS.map(p => ({ value: p, label: p }));
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="type" className={labelClass}>Type de transaction</label>
-        <select {...register("type")} id="type" className={baseInputClass}>
-          <option value="depense">Dépense</option>
-          <option value="revenu">Revenu</option>
-        </select>
-      </div>
+      <SelectFormField
+        id="type"
+        label="Type de transaction"
+        register={register('type')}
+        error={errors.type}
+        options={typeOptions}
+      />
 
       {transactionType === 'depense' && (
-        <div>
-          <label htmlFor="pillar" className={labelClass}>Pilier</label>
-          <select {...register("pillar")} id="pillar" className={baseInputClass}>
-            <option value="">Sélectionner un pilier...</option>
-            {pillars.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          {errors.pillar && <p className="text-red-500 text-sm mt-1">{errors.pillar.message}</p>}
-        </div>
+        <SelectFormField
+          id="pillar"
+          label="Pilier"
+          register={register('pillar')}
+          error={errors.pillar}
+          options={pillarOptions}
+          placeholderOptionLabel="Sélectionner un pilier..."
+        />
       )}
 
-      <div>
-        <label htmlFor="categoryId" className={labelClass}>Catégorie</label>
-        <select {...register("categoryId")} id="categoryId" className={baseInputClass} disabled={!transactionType || availableCategories.length === 0}>
-          <option value="">Sélectionner une catégorie...</option>
-          {availableCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-        </select>
-        {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId.message}</p>}
-      </div>
+      <SelectFormField
+        id="categoryId"
+        label="Catégorie"
+        register={register('categoryId')}
+        error={errors.categoryId}
+        options={availableCategoryOptions}
+        disabled={availableCategoryOptions.length === 0}
+        placeholderOptionLabel="Sélectionner une catégorie..."
+      />
       
-      <div>
-        <label htmlFor="description" className={labelClass}>Description</label>
-        <input {...register("description")} id="description" type="text" placeholder="Ex: Courses de la semaine" className={baseInputClass} />
-        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-      </div>
+      <TextInputFormField
+        id="description"
+        label="Description"
+        register={register('description')}
+        error={errors.description}
+        type="text"
+        placeholder="Ex: Courses de la semaine"
+      />
 
-      <div>
-        <label htmlFor="amount" className={labelClass}>Montant (€)</label>
-        <input {...register("amount")} id="amount" type="number" step="0.01" placeholder="0.00" className={baseInputClass} />
-        {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount.message}</p>}
-      </div>
+      <TextInputFormField
+        id="amount"
+        label="Montant (€)"
+        register={register('amount')}
+        error={errors.amount}
+        type="number"
+        step="0.01"
+        placeholder="0.00"
+      />
 
-      <div>
-        <label htmlFor="date" className={labelClass}>Date</label>
-        <input {...register("date")} id="date" type="date" className={baseInputClass} />
-        {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
-      </div>
+      <TextInputFormField
+        id="date"
+        label="Date"
+        register={register('date')}
+        error={errors.date}
+        type="date"
+      />
 
-      <div className="pt-4">
+      <div className="pt-6">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-150 disabled:bg-gray-400 disabled:dark:bg-gray-500 disabled:text-gray-600 disabled:dark:text-gray-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Sauvegarde...' : (isEditing ? 'Sauvegarder les modifications' : 'Ajouter la transaction')}
         </button>

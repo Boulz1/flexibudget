@@ -39,7 +39,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
               {/* Le panneau de la modale avec les classes dark: */}
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
                 {/* Le titre avec les classes dark: */}
-                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                   {title}
                 </Dialog.Title>
                 <div className="mt-4">

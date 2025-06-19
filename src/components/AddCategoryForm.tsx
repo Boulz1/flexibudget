@@ -2,13 +2,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCategoryStore } from '../stores/categoryStore';
-import type { Pillar, Category } from '../types';
+import type { Category } from '../types';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import TextInputFormField from './forms/TextInputFormField';
+import SelectFormField from './forms/SelectFormField';
+import { PILLARS } from '../../constants'; // Adjusted path
 
 const categorySchema = z.object({
   type: z.enum(['revenu', 'depense']),
-  pillar: z.enum(['Besoins', 'Envies', 'Épargne']).optional(),
+  pillar: z.enum(PILLARS).optional(), // Use imported PILLARS
   name: z.string().min(2, { message: 'Le nom doit faire au moins 2 caractères.' }),
 }).refine(data => data.type === 'revenu' || (data.type === 'depense' && !!data.pillar), {
   message: "Un pilier est requis pour une dépense.",
@@ -69,41 +72,47 @@ const AddCategoryForm = ({ onFormSubmit, categoryToEdit }: AddCategoryFormProps)
     onFormSubmit();
   };
 
-  const pillars: Pillar[] = ['Besoins', 'Envies', 'Épargne'];
-  const baseInputClass = "mt-1 w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-brand-besoins focus:border-brand-besoins";
+  const pillarOptions = PILLARS.map(p => ({ value: p, label: p }));
+  const typeOptions = [
+    { value: 'depense', label: 'Dépense' },
+    { value: 'revenu', label: 'Revenu' },
+  ];
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type de catégorie</label>
-        <select {...register('type')} id="type" className={baseInputClass}>
-          <option value="depense">Dépense</option>
-          <option value="revenu">Revenu</option>
-        </select>
-      </div>
+      <SelectFormField
+        id="type"
+        label="Type de catégorie"
+        register={register('type')}
+        error={errors.type}
+        options={typeOptions}
+      />
 
       {categoryType === 'depense' && (
-        <div>
-          <label htmlFor="pillar" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pilier</label>
-          <select {...register('pillar')} id="pillar" className={baseInputClass}>
-            <option value="">Sélectionner un pilier...</option>
-            {pillars.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          {errors.pillar && <p className="text-red-500 text-sm mt-1">{errors.pillar.message}</p>}
-        </div>
+        <SelectFormField
+          id="pillar"
+          label="Pilier"
+          register={register('pillar')}
+          error={errors.pillar}
+          options={pillarOptions}
+          placeholderOptionLabel="Sélectionner un pilier..."
+        />
       )}
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom de la catégorie</label>
-        <input {...register('name')} id="name" type="text" placeholder="Ex: Courses, Salaire..." className={baseInputClass} />
-        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-      </div>
+      <TextInputFormField
+        id="name"
+        label="Nom de la catégorie"
+        register={register('name')}
+        error={errors.name}
+        type="text"
+        placeholder="Ex: Courses, Salaire..."
+      />
 
-      <div className="pt-4">
+      <div className="pt-6">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-150 disabled:bg-gray-400 disabled:dark:bg-gray-500 disabled:text-gray-600 disabled:dark:text-gray-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Sauvegarde...' : (isEditing ? 'Sauvegarder les modifications' : 'Ajouter la catégorie')}
         </button>

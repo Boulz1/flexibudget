@@ -6,8 +6,8 @@ const Header = () => {
   const [theme, toggleTheme] = useTheme();
 
   // Styles pour les liens de navigation
-  const linkStyle = "p-2 rounded-md hover:bg-gray-700 transition-colors";
-  const activeLinkStyle = "bg-gray-600";
+  const linkStyle = "p-2 rounded-md hover:bg-gray-700 transition-colors"; // Retain hover:bg-gray-700 as it's specific to dark header
+  const activeLinkStyle = "bg-gray-600"; // Retain specific active style for dark header
 
   return (
     <header className="bg-gray-800 p-4 text-white shadow-md sticky top-0 z-40">
@@ -27,10 +27,10 @@ const Header = () => {
             Paramètres
           </NavLink>
           
-          {/* Bouton de changement de thème avec les nouvelles icônes */}
+          {/* Bouton de changement de thème avec les nouvelles icônes et styles */}
           <button 
             onClick={toggleTheme} 
-            className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors" // Adjusted hover for consistency, dark:hover:bg-gray-600 is an example if needed, current hover:bg-gray-700 is fine for dark theme.
             title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
           >
             {theme === 'light' ? 
